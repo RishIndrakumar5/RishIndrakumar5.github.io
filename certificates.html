@@ -1,0 +1,77 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="color-scheme" content="dark">
+    <title>Certificates - Rishwanth Indrakumar</title>
+    <link rel="stylesheet" href="styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&display=swap" rel="stylesheet">
+</head>
+<body>
+    <nav class="navbar">
+        <div class="nav-container">
+            <a href="index.html" class="nav-logo">Rishwanth I.</a>
+            <ul class="nav-menu">
+                <li><a href="index.html#about">About</a></li>
+                <li><a href="index.html#interests">Interests</a></li>
+                <li><a href="index.html#projects">Projects</a></li>
+                <li><a href="index.html#skills">Skills</a></li>
+                <li><a href="index.html#goals">Goals</a></li>
+                <li><a href="certificates.html" class="active">Certificates</a></li>
+                <li><a href="index.html#contact">Contact</a></li>
+            </ul>
+        </div>
+    </nav>
+
+    <section class="hero hero-compact">
+        <div class="hero-content">
+            <h1 class="hero-title">Certificates</h1>
+            <p class="hero-description">Awards, courses, and achievements</p>
+        </div>
+    </section>
+
+    <section class="section">
+        <div class="container">
+            <div class="cert-toolbar" id="cert-toolbar">
+                <button type="button" class="cert-btn" id="unlock-btn">Edit (passcode required)</button>
+                <div class="cert-edit-actions" id="edit-actions" hidden>
+                    <button type="button" class="cert-btn cert-btn-primary" id="add-cert-btn">Add certificate</button>
+                    <button type="button" class="cert-btn" id="save-btn">Save</button>
+                    <button type="button" class="cert-btn" id="download-btn">Download backup</button>
+                    <button type="button" class="cert-btn cert-btn-muted" id="lock-btn">Lock</button>
+                </div>
+                <p class="cert-save-status" id="save-status" aria-live="polite"></p>
+            </div>
+            <p class="cert-hint" id="cert-hint" hidden>You are editing. Click <strong>Save</strong> to publish so everyone can see your certificates. Local server: <code>http://localhost:4173/certificates.html</code></p>
+
+            <div class="cert-board" id="cert-board" aria-label="Certificates display">
+                <p class="cert-empty" id="cert-empty">No certificates yet.</p>
+            </div>
+        </div>
+    </section>
+
+    <div class="cert-modal" id="passcode-modal" hidden>
+        <div class="cert-modal-card">
+            <h3>Enter passcode</h3>
+            <p>Only you can edit this page.</p>
+            <input type="password" id="passcode-input" placeholder="Passcode" autocomplete="current-password">
+            <p class="cert-error" id="passcode-error" hidden>Incorrect passcode.</p>
+            <div class="cert-modal-actions">
+                <button type="button" class="cert-btn" id="passcode-cancel">Cancel</button>
+                <button type="button" class="cert-btn cert-btn-primary" id="passcode-submit">Unlock</button>
+            </div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="container">
+            <p>&copy; 2024 Rishwanth Indrakumar. All rights reserved.</p>
+            <p class="footer-school">CREC Academy of Computer Science and Engineering Middle School</p>
+        </div>
+    </footer>
+
+    <script src="certificates-data.js"></script>
+    <script src="certificates.js"></script>
+</body>
+</html>
