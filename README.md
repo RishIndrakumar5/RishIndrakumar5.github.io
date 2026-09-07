@@ -15,24 +15,22 @@ A modern, responsive portfolio website showcasing the academic achievements, pro
 
 ## Getting Started
 
-1. For normal browsing, open `index.html` in a web browser
-2. To edit certificates and publish them for everyone, run:
+1. Open `index.html` in a web browser, or run a local server:
 
 ```bash
 node server.js
 ```
 
-Then open http://localhost:4173/certificates.html — unlock with your passcode and click **Save**. That updates `certificates-data.js` and pushes it to GitHub so your live site shows the changes.
+Then visit http://localhost:4173
 
 ## File Structure
 
 ```
 portfolio/
 ├── index.html              # Main HTML file
-├── certificates.html       # Certificates display / editor
-├── certificates.js         # Certificates page logic
-├── certificates-data.js    # Published certificate data
-├── server.js               # Local server (enables Save to portfolio)
+├── certificates.html       # Certificates gallery
+├── images/                 # Project and certificate images
+├── server.js               # Optional local static server
 ├── styles.css              # Styling and layout
 ├── script.js               # Interactive features and animations
 └── README.md               # This file

@@ -33,35 +33,69 @@
 
     <section class="section">
         <div class="container">
-            <div class="cert-toolbar" id="cert-toolbar">
-                <button type="button" class="cert-btn" id="unlock-btn">Edit (passcode required)</button>
-                <div class="cert-edit-actions" id="edit-actions" hidden>
-                    <button type="button" class="cert-btn cert-btn-primary" id="add-cert-btn">Add certificate</button>
-                    <button type="button" class="cert-btn" id="save-btn">Save</button>
-                    <button type="button" class="cert-btn cert-btn-muted" id="lock-btn">Lock</button>
-                </div>
-                <p class="cert-save-status" id="save-status" aria-live="polite"></p>
-            </div>
-            <p class="cert-hint" id="cert-hint" hidden>You are editing. Keep <code>node server.js</code> running, then click <strong>Save</strong> to publish to the live page and lock editing.</p>
+            <div class="certificates-grid">
+                <article class="certificate-card">
+                    <div class="certificate-media certificate-media-placeholder">
+                        <span>ANCHOR PEP</span>
+                    </div>
+                    <div class="certificate-body">
+                        <h3>ANCHOR PEP</h3>
+                        <p>I participated in ANCHOR PEP at UCONN</p>
+                    </div>
+                </article>
 
-            <div class="cert-board" id="cert-board" aria-label="Certificates display">
-                <p class="cert-empty" id="cert-empty">No certificates yet.</p>
+                <article class="certificate-card">
+                    <div class="certificate-media">
+                        <img src="images/cmea-regionals.png" alt="CMEA Regional Orchestra Festival Certificate of Achievement for Rishwanth Indrakumar">
+                    </div>
+                    <div class="certificate-body">
+                        <h3>CMEA Regionals</h3>
+                        <p>I was 2nd Violin in the CMEA Regional Orchestra</p>
+                    </div>
+                </article>
+
+                <article class="certificate-card">
+                    <div class="certificate-media certificate-media-placeholder">
+                        <span>Honor Roll</span>
+                    </div>
+                    <div class="certificate-body">
+                        <h3>6th Grade Honor Roll</h3>
+                        <p>I earned this for Excellence in Academics</p>
+                    </div>
+                </article>
+
+                <article class="certificate-card">
+                    <div class="certificate-media certificate-media-placeholder">
+                        <span>Honor Roll</span>
+                    </div>
+                    <div class="certificate-body">
+                        <h3>7th Grade Honor Roll</h3>
+                        <p>Awarded after my first quarter</p>
+                    </div>
+                </article>
+
+                <article class="certificate-card">
+                    <div class="certificate-media certificate-media-placeholder">
+                        <span>High Honors</span>
+                    </div>
+                    <div class="certificate-body">
+                        <h3>High Honors 7th Grade. 1</h3>
+                        <p>Awarded after my second quarter</p>
+                    </div>
+                </article>
+
+                <article class="certificate-card">
+                    <div class="certificate-media certificate-media-placeholder">
+                        <span>High Honors</span>
+                    </div>
+                    <div class="certificate-body">
+                        <h3>High Honors 7th Grade. 2</h3>
+                        <p>Awarded after my third quarter</p>
+                    </div>
+                </article>
             </div>
         </div>
     </section>
-
-    <div class="cert-modal" id="passcode-modal" hidden>
-        <div class="cert-modal-card">
-            <h3>Enter passcode</h3>
-            <p>Only you can edit this page.</p>
-            <input type="password" id="passcode-input" placeholder="Passcode" autocomplete="current-password">
-            <p class="cert-error" id="passcode-error" hidden>Incorrect passcode.</p>
-            <div class="cert-modal-actions">
-                <button type="button" class="cert-btn" id="passcode-cancel">Cancel</button>
-                <button type="button" class="cert-btn cert-btn-primary" id="passcode-submit">Unlock</button>
-            </div>
-        </div>
-    </div>
 
     <footer class="footer">
         <div class="container">
@@ -69,8 +103,5 @@
             <p class="footer-school">CREC Academy of Computer Science and Engineering Middle School</p>
         </div>
     </footer>
-
-    <script src="certificates-data.js"></script>
-    <script src="certificates.js"></script>
 </body>
 </html>
