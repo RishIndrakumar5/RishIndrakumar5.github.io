@@ -653,7 +653,7 @@ body {
 }
 
 .certificate-media {
-    aspect-ratio: 4 / 3;
+    aspect-ratio: 3 / 2;
     background: #0f172a;
     overflow: hidden;
 }
