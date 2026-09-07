@@ -345,6 +345,21 @@ body {
     line-height: 1.6;
 }
 
+.project-card p.project-link {
+    padding-top: 0;
+}
+
+.project-link a {
+    color: var(--primary-color);
+    text-decoration: none;
+    font-weight: 600;
+}
+
+.project-link a:hover {
+    text-decoration: underline;
+    color: var(--accent-color);
+}
+
 /* Skills Section */
 .skills-grid {
     display: grid;
