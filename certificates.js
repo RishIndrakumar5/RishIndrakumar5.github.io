@@ -10,7 +10,6 @@
     const editActions = document.getElementById('edit-actions');
     const addBtn = document.getElementById('add-cert-btn');
     const saveBtn = document.getElementById('save-btn');
-    const downloadBtn = document.getElementById('download-btn');
     const lockBtn = document.getElementById('lock-btn');
     const modal = document.getElementById('passcode-modal');
     const passcodeInput = document.getElementById('passcode-input');
@@ -26,7 +25,6 @@
     let data = loadData();
     let dragState = null;
     let resizeState = null;
-    let fileHandle = null;
 
     function defaultData() {
         const published = window.CERTIFICATES_DATA || { boardHeight: 700, items: [] };
@@ -37,23 +35,8 @@
     }
 
     function loadData() {
-        // Portfolio file is the source of truth
+        // Live page file (certificates-data.js) is the source of truth
         return defaultData();
-    }
-
-    function cacheLocally() {
-        try {
-            localStorage.setItem(STORAGE_KEY, JSON.stringify(data));
-        } catch (_) {
-            // Large images can exceed localStorage quota; portfolio file save still works
-        }
-    }
-
-    function dataFileContents() {
-        return (
-            '// Published certificate data — updated by Save on the Certificates page.\n' +
-            `window.CERTIFICATES_DATA = ${JSON.stringify(data, null, 2)};\n`
-        );
     }
 
     function setSaveStatus(message, isError = false) {
@@ -79,7 +62,7 @@
         return false;
     }
 
-    function setEditing(on) {
+    function setEditing(on, statusMessage) {
         editing = !!on;
         if (on) {
             sessionStorage.setItem(SESSION_KEY, '1');
@@ -92,7 +75,11 @@
         editActions.hidden = !on;
         if (certHint) certHint.hidden = !on;
         board.classList.toggle('is-editing', on);
-        setSaveStatus(on ? 'Editing unlocked. Add or change certificates, then Save.' : '');
+        if (typeof statusMessage === 'string') {
+            setSaveStatus(statusMessage);
+        } else {
+            setSaveStatus(on ? 'Editing unlocked. Add or change certificates, then Save.' : '');
+        }
         render();
     }
 
@@ -384,6 +371,14 @@
         render();
     }
 
+    function clearLocalCache() {
+        try {
+            localStorage.removeItem(STORAGE_KEY);
+        } catch (_) {
+            /* ignore */
+        }
+    }
+
     async function saveViaServer() {
         const res = await fetch('/api/certificates', {
             method: 'POST',
@@ -398,77 +393,29 @@
             throw new Error(result.error || 'Server save failed');
         }
         window.CERTIFICATES_DATA = structuredClone(data);
-        return result.message || (result.published
-            ? 'Saved and published — everyone can see this on your live site.'
-            : 'Saved to your portfolio!');
-    }
-
-    async function saveViaFilePicker() {
-        if (!window.showSaveFilePicker) {
-            throw new Error('File picker unavailable');
-        }
-
-        if (!fileHandle) {
-            fileHandle = await window.showSaveFilePicker({
-                suggestedName: 'certificates-data.js',
-                types: [
-                    {
-                        description: 'Certificate data',
-                        accept: { 'text/javascript': ['.js'] }
-                    }
-                ]
-            });
-        }
-
-        const writable = await fileHandle.createWritable();
-        await writable.write(dataFileContents());
-        await writable.close();
-        window.CERTIFICATES_DATA = structuredClone(data);
-        return 'Saved to certificates-data.js in your portfolio folder.';
-    }
-
-    function saveViaDownload() {
-        const blob = new Blob([dataFileContents()], { type: 'application/javascript' });
-        const url = URL.createObjectURL(blob);
-        const a = document.createElement('a');
-        a.href = url;
-        a.download = 'certificates-data.js';
-        a.click();
-        URL.revokeObjectURL(url);
-        window.CERTIFICATES_DATA = structuredClone(data);
-        return 'Downloaded certificates-data.js — move it into your Portfolio folder to replace the old file.';
+        return result.message || 'Saved to the live certificates page.';
     }
 
     async function saveToPortfolio() {
         if (!requireEdit()) return;
         saveBtn.disabled = true;
-        setSaveStatus('Saving…');
-        cacheLocally();
+        setSaveStatus('Saving to the live page…');
 
         try {
-            // Prefer writing directly into the portfolio via the local server
-            let message;
-            try {
-                message = await saveViaServer();
-            } catch (_) {
-                try {
-                    message = await saveViaFilePicker();
-                } catch (err) {
-                    if (err && err.name === 'AbortError') {
-                        setSaveStatus('Save canceled.', true);
-                        return;
-                    }
-                    message = saveViaDownload();
-                }
+            if (!window.location.protocol.startsWith('http') || window.location.hostname === '') {
+                throw new Error(
+                    'Open http://localhost:4173/certificates.html with the local server to save to the live page.'
+                );
             }
 
-            saveBtn.textContent = 'Saved!';
-            setSaveStatus(message);
-            setTimeout(() => {
-                saveBtn.textContent = 'Save';
-            }, 1500);
+            const message = await saveViaServer();
+            clearLocalCache();
+            setEditing(false, message || 'Saved to the live page. Editing is locked.');
+            saveBtn.textContent = 'Save';
         } catch (err) {
-            setSaveStatus(err.message || 'Save failed.', true);
+            const fallbackHint =
+                ' Could not save to the live page. Run node server.js and use http://localhost:4173/certificates.html';
+            setSaveStatus((err && err.message ? err.message : 'Save failed.') + fallbackHint, true);
         } finally {
             saveBtn.disabled = false;
         }
@@ -483,12 +430,6 @@
     saveBtn.addEventListener('click', (e) => {
         e.preventDefault();
         saveToPortfolio();
-    });
-    downloadBtn.addEventListener('click', (e) => {
-        e.preventDefault();
-        if (!requireEdit()) return;
-        cacheLocally();
-        setSaveStatus(saveViaDownload());
     });
     passcodeCancel.addEventListener('click', () => showModal(false));
     passcodeSubmit.addEventListener('click', tryUnlock);

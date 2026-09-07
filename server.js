@@ -81,7 +81,9 @@ function publishCertificates() {
     git(['add', '--', 'certificates-data.js']);
     const status = git(['status', '--porcelain', '--', 'certificates-data.js']).trim();
     if (!status) {
-        return { published: false, reason: 'No changes to publish' };
+        // Still sync the live GitHub Pages site in case it was behind
+        deployCertificatesToPages();
+        return { published: true, reason: 'Already up to date; synced live site' };
     }
 
     try {
@@ -89,11 +91,64 @@ function publishCertificates() {
     } catch (err) {
         const msg = `${err.stdout || ''}${err.stderr || ''}${err.message || ''}`;
         if (!/nothing to commit/i.test(msg)) throw err;
-        return { published: false, reason: 'No changes to publish' };
     }
 
     git(['push', 'origin', 'HEAD']);
+    deployCertificatesToPages();
     return { published: true };
+}
+
+function deployCertificatesToPages() {
+    const os = require('os');
+    const tmp = fs.mkdtempSync(path.join(os.tmpdir(), 'portfolio-pages-'));
+    try {
+        execFileSync(
+            'git',
+            ['clone', '--depth', '1', 'https://github.com/RishIndrakumar5/RishIndrakumar5.github.io.git', tmp],
+            {
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'pipe'],
+                env: process.env
+            }
+        );
+        fs.copyFileSync(DATA_FILE, path.join(tmp, 'certificates-data.js'));
+
+        const run = (args) =>
+            execFileSync('git', args, {
+                cwd: tmp,
+                encoding: 'utf8',
+                stdio: ['ignore', 'pipe', 'pipe'],
+                env: {
+                    ...process.env,
+                    GIT_AUTHOR_NAME: process.env.GIT_AUTHOR_NAME || 'Rish',
+                    GIT_AUTHOR_EMAIL:
+                        process.env.GIT_AUTHOR_EMAIL ||
+                        '237796974+RishIndrakumar5@users.noreply.github.com',
+                    GIT_COMMITTER_NAME: process.env.GIT_COMMITTER_NAME || 'Rish',
+                    GIT_COMMITTER_EMAIL:
+                        process.env.GIT_COMMITTER_EMAIL ||
+                        '237796974+RishIndrakumar5@users.noreply.github.com'
+                }
+            });
+
+        run(['add', '--', 'certificates-data.js']);
+        const dirty = run(['status', '--porcelain', '--', 'certificates-data.js']).trim();
+        if (!dirty) return;
+        try {
+            run(['commit', '-m', 'Update published certificates on live site']);
+        } catch (err) {
+            const msg = `${err.stdout || ''}${err.stderr || ''}${err.message || ''}`;
+            if (!/nothing to commit/i.test(msg)) throw err;
+            return;
+        }
+        run(['push', 'origin', 'HEAD']);
+    } finally {
+        try {
+            fs.rmSync(tmp, { recursive: true, force: true });
+        } catch (_) {
+            /* ignore cleanup errors */
+        }
+    }
 }
 
 const server = http.createServer(async (req, res) => {
@@ -121,7 +176,7 @@ const server = http.createServer(async (req, res) => {
 
             fs.writeFileSync(DATA_FILE, contents, 'utf8');
 
-            let publish = { published: false, reason: 'Skipped' };
+            let publish = { published: true };
             try {
                 publish = publishCertificates();
             } catch (err) {
@@ -131,7 +186,7 @@ const server = http.createServer(async (req, res) => {
                     JSON.stringify({
                         ok: false,
                         error:
-                            'Saved on this computer, but could not publish online: ' +
+                            'Could not publish to the live page: ' +
                             (err.stderr || err.message || 'git push failed')
                     }),
                     'application/json; charset=utf-8'
@@ -144,10 +199,9 @@ const server = http.createServer(async (req, res) => {
                 200,
                 JSON.stringify({
                     ok: true,
-                    published: publish.published,
-                    message: publish.published
-                        ? 'Saved and published — everyone can see this on your live site.'
-                        : 'Saved. ' + (publish.reason || 'Already up to date online.')
+                    published: true,
+                    message:
+                        'Saved to the live certificates page. Editing is locked.'
                 }),
                 'application/json; charset=utf-8'
             );
