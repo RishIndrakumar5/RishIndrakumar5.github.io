@@ -379,15 +379,31 @@
         }
     }
 
+    function getSaveApiUrl() {
+        // GitHub Pages has no save API — always post to the local portfolio server
+        const host = window.location.hostname;
+        if (host === 'localhost' || host === '127.0.0.1') {
+            return '/api/certificates';
+        }
+        return 'http://localhost:4173/api/certificates';
+    }
+
     async function saveViaServer() {
-        const res = await fetch('/api/certificates', {
-            method: 'POST',
-            headers: { 'Content-Type': 'application/json' },
-            body: JSON.stringify({
-                passcodeHash: PASSCODE_HASH,
-                data
-            })
-        });
+        let res;
+        try {
+            res = await fetch(getSaveApiUrl(), {
+                method: 'POST',
+                headers: { 'Content-Type': 'application/json' },
+                body: JSON.stringify({
+                    passcodeHash: PASSCODE_HASH,
+                    data
+                })
+            });
+        } catch (_) {
+            throw new Error(
+                'Local save server is not running. In your Portfolio folder run: node server.js — then try Save again.'
+            );
+        }
         const result = await res.json().catch(() => ({}));
         if (!res.ok) {
             throw new Error(result.error || 'Server save failed');
@@ -402,20 +418,12 @@
         setSaveStatus('Saving to the live page…');
 
         try {
-            if (!window.location.protocol.startsWith('http') || window.location.hostname === '') {
-                throw new Error(
-                    'Open http://localhost:4173/certificates.html with the local server to save to the live page.'
-                );
-            }
-
             const message = await saveViaServer();
             clearLocalCache();
             setEditing(false, message || 'Saved to the live page. Editing is locked.');
             saveBtn.textContent = 'Save';
         } catch (err) {
-            const fallbackHint =
-                ' Could not save to the live page. Run node server.js and use http://localhost:4173/certificates.html';
-            setSaveStatus((err && err.message ? err.message : 'Save failed.') + fallbackHint, true);
+            setSaveStatus(err && err.message ? err.message : 'Save failed.', true);
         } finally {
             saveBtn.disabled = false;
         }
